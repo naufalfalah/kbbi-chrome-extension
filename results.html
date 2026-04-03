@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KBBI</title>
+    <link rel="stylesheet" href="shared.css" />
+    <style>
+      body {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 32px 20px;
+      }
+
+      .page-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+        border-bottom: 2px solid var(--red);
+        padding-bottom: 16px;
+      }
+
+      .logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: var(--red);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 900;
+        font-size: 22px;
+      }
+
+      .page-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--red);
+      }
+
+      .page-subtitle {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      .search-bar {
+        margin-bottom: 24px;
+      }
+
+      .search-bar input {
+        font-size: 16px;
+        padding: 11px 16px;
+      }
+
+      .search-bar button {
+        padding: 11px 24px;
+        font-size: 15px;
+      }
+
+      .query-label {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+      }
+
+      .query-label strong {
+        color: var(--text);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-header">
+      <div class="logo">K</div>
+      <div>
+        <div class="page-title">KBBI</div>
+        <div class="page-subtitle">Kamus Besar Bahasa Indonesia</div>
+      </div>
+    </div>
+
+    <div class="search-bar">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Cari kata…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button id="searchBtn">Cari</button>
+    </div>
+
+    <div id="queryLabel" class="query-label" style="display:none"></div>
+    <div id="results"></div>
+
+    <script src="kbbi.js"></script>
+    <script src="render.js"></script>
+    <script src="results.js"></script>
+  </body>
+</html>

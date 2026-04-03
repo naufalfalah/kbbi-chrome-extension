@@ -1,0 +1,268 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --red: #cc0001;
+  --red-light: #f8e8e8;
+  --text: #1a1a2e;
+  --text-muted: #666;
+  --border: #e0e0e0;
+  --bg: #ffffff;
+  --bg-soft: #f9f9f9;
+  --label-color: #b5451b;
+  --example-color: #2563a8;
+  --radius: 8px;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+body {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+}
+
+/* ── Search bar ── */
+.search-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 9px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  color: var(--text);
+}
+
+.search-bar input:focus {
+  border-color: var(--red);
+}
+
+.search-bar button {
+  padding: 9px 18px;
+  background: var(--red);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.search-bar button:hover {
+  background: #a80001;
+}
+
+.search-bar button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ── Status messages ── */
+.status {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.status.error {
+  color: var(--red);
+}
+
+.spinner {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-bottom: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Entry card ── */
+.entry {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 12px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.entry-header {
+  padding: 10px 16px;
+  background: var(--red);
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.entry-body {
+  padding: 12px 16px;
+}
+
+/* ── Definition list ── */
+.def-list {
+  list-style: none;
+  counter-reset: def-counter;
+}
+
+.def-item {
+  counter-increment: def-counter;
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--bg-soft);
+}
+
+.def-item:last-child {
+  border-bottom: none;
+}
+
+.def-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--red-light);
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.def-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.def-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--label-color);
+  background: #fdebd0;
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+.def-text {
+  color: var(--text);
+}
+
+.def-examples {
+  margin-top: 4px;
+}
+
+.def-example {
+  display: block;
+  color: var(--example-color);
+  font-style: italic;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.def-example::before {
+  content: '→ ';
+  font-style: normal;
+  color: var(--text-muted);
+}
+
+/* ── Compound / derived word items ── */
+.compound-item {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--bg-soft);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.compound-item:last-child {
+  border-bottom: none;
+}
+
+/* ── Suggestions ── */
+.suggestions {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--bg-soft);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.suggestions h3 {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sug-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sug-btn {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.sug-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* ── KBBI source link ── */
+.kbbi-link {
+  display: block;
+  margin-top: 10px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.kbbi-link:hover {
+  text-decoration: underline;
+  color: var(--red);
+}
+
+/* ── Results container ── */
+#results {
+  margin-top: 14px;
+}

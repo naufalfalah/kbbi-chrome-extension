@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KBBI</title>
+    <link rel="stylesheet" href="shared.css" />
+    <style>
+      body {
+        width: 380px;
+        min-height: 80px;
+        max-height: 560px;
+        overflow-y: auto;
+        padding: 14px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .header-logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: var(--red);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 800;
+        font-size: 15px;
+        flex-shrink: 0;
+      }
+
+      .header-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--red);
+        letter-spacing: 0.03em;
+      }
+
+      .header-subtitle {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="header-logo">K</div>
+      <div>
+        <div class="header-title">KBBI</div>
+        <div class="header-subtitle">Kamus Besar Bahasa Indonesia</div>
+      </div>
+    </div>
+
+    <div class="search-bar">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Cari kata…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button id="searchBtn">Cari</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script src="kbbi.js"></script>
+    <script src="render.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
