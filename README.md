@@ -1,14 +1,14 @@
 # KBBI Chrome Extension
 
-Chrome extension (Manifest V3) to look up Indonesian word definitions from [kbbi.web.id](https://kbbi.web.id).
+Chrome extension (Manifest V3) to look up Indonesian word definitions from the official [KBBI VI Daring](https://kbbi.kemendikdasmen.go.id) — Kementerian Pendidikan Dasar dan Menengah.
 
 ## Features
 
 - **Popup search** — click the toolbar icon, type or paste a word, press Enter
 - **Context menu** — select any word on a page → right-click → "Cari '[word]' di KBBI" → opens a full results tab
-- Displays numbered definitions, grammar labels (v, n, ki, pb, …), and usage examples
-- Clickable suggestions when a word is not found
-- "Lihat di kbbi.web.id" source link on every result
+- Displays numbered definitions, grammar labels (v, n, ki, pb, Ark, Tas, …), and usage examples
+- "Lihat di KBBI VI Daring" source link on every result
+- Color scheme matches the official KBBI VI site (navy #292261 → red gradient, gold K)
 
 ## Install (development)
 
@@ -36,11 +36,11 @@ kbbi-chrome-extension/
 ├── results.js          # Results page controller
 │
 ├── icons/
-│   ├── icon16.png
-│   ├── icon48.png
-│   └── icon128.png
+│   ├── icon16.png      # Extracted from kbbi.kemendikdasmen.go.id favicon
+│   ├── icon48.png      # (upscaled from 16px)
+│   └── icon128.png     # (upscaled from 48px)
 │
-└── generate-icons.js   # Node script to regenerate PNG icons (run once)
+└── generate-icons.js   # Node script to regenerate icons (fallback, run once)
 ```
 
 ## Architecture
@@ -49,10 +49,10 @@ kbbi-chrome-extension/
 
 ```
 popup.html
-  └── popup.js  →  kbbi.js (searchKBBI)  →  fetch https://kbbi.web.id/{word}
+  └── popup.js  →  kbbi.js (searchKBBI)  →  fetch https://kbbi.kemendikdasmen.go.id/entri/{word}
                        └── parseKBBI()
-                             ├── primary:  parse #jsdata JSON  →  parseFromJSON()
-                             └── fallback: parse HTML directly →  parseFromHTML()
+                             ├── detect "Entri tidak ditemukan" → found: false
+                             └── parse h2 + ol/ul → entries[]
                 ↓
              render.js (renderResults / renderLoading / renderError)
                 ↓
@@ -70,25 +70,43 @@ User selects text → right-click → "Cari … di KBBI"
 
 ### Parser (`kbbi.js`)
 
-kbbi.web.id embeds a JSON array in `<div id="jsdata">` that the page's own JS renders. Each element:
+The site renders definitions as plain server-side HTML. There is no JSON data container (unlike the old kbbi.web.id).
 
-| Field | Type   | Description                              |
-|-------|--------|------------------------------------------|
-| `x`   | number | Entry type: `1` = primary, `5` = related |
-| `w`   | string | Word lemma (e.g. `"makan¹"`)             |
-| `d`   | string | Full definition as an HTML fragment      |
-| `msg` | string | Non-empty when word is not found         |
+**URL:** `GET https://kbbi.kemendikdasmen.go.id/entri/{word}`
 
-The `d` HTML fragment structure:
+**Page structure:**
+
 ```html
-<b>ma·kan¹</b> <em>v</em>
-<b>1</b> first definition <em>usage example</em>
-<b>2</b> <span class="jk">ki</span> figurative meaning
+<h2 style="margin-bottom:3px">ma.kan<sup>1</sup></h2>
+
+<ol>
+  <li>
+    <font color="red"><i>
+      <span title="Verba: kata kerja">v</span>
+      <span title="kiasan"><font color="green">ki</font></span>
+    </i></font>
+    definition text:
+    <font color="grey"><i>usage example</i></font>
+    <font color="brown"><i>(clarification gloss)</i></font>
+  </li>
+</ol>
+
+<ul class="adjusted-par">  <!-- derived/secondary entries -->
+  <li>...</li>
+</ul>
 ```
 
-`parseDefinitionHTML()` splits this by `<b>` tags that contain only digits to extract individual numbered definitions. `<em>` tags shorter than 5 all-alpha characters are treated as grammar labels; longer ones are usage examples.
+**Not found:** `<h4 style="color:red">Entri tidak ditemukan.</h4>`
 
-If `#jsdata` is absent or unparseable, `parseFromHTML()` falls back to scanning for `<b>word·suku</b>` patterns and `<article>` / `#desc` containers.
+**Parsing strategy:**
+1. Find all `<h2>` elements with a `<sup>` child or `margin-bottom` style → one entry per h2
+2. For each h2, walk forward siblings collecting `<ol>` and `<ul>` elements until the next entry h2
+3. For each `<li>`:
+   - Grammar labels: `<span>` inside `font[color="red"] i`
+   - Usage-type labels (ki, pb, etc.): `font[color="green"]`
+   - Examples: `font[color="grey"] i`
+   - Brown gloss: `font[color="brown"] i` — appended to examples in parentheses
+   - Definition text: remaining text after removing all `<font>` elements
 
 ### Rendering (`render.js`)
 
@@ -99,7 +117,7 @@ If `#jsdata` is absent or unparseable, `parseFromHTML()` falls back to scanning 
   found: boolean,
   entries: [
     {
-      word: string,           // e.g. "ma·kan¹"
+      word: string,           // e.g. "ma.kan¹"
       definitions: [
         {
           type: 'definition' | 'compound',
@@ -110,31 +128,48 @@ If `#jsdata` is absent or unparseable, `parseFromHTML()` falls back to scanning 
       ]
     }
   ],
-  suggestions: string[]       // populated when found === false
+  suggestions: string[]       // always [] for this source (no suggestions provided)
 }
 ```
 
-`onSuggestionClick(word)` must be defined in the page's own JS (popup.js / results.js) — render.js calls it when a suggestion chip is clicked.
+`onSuggestionClick(word)` must be defined in the page's own JS (popup.js / results.js).
 
 ## Permissions
 
-| Permission        | Why                                          |
-|-------------------|----------------------------------------------|
-| `contextMenus`    | Register right-click "Cari di KBBI" item     |
-| `tabs`            | Open results.html in a new tab               |
-| `host_permissions: https://kbbi.web.id/*` | Bypass CORS to fetch definitions |
+| Permission        | Why                                                      |
+|-------------------|----------------------------------------------------------|
+| `contextMenus`    | Register right-click "Cari di KBBI" item                 |
+| `tabs`            | Open results.html in a new tab                           |
+| `host_permissions: https://kbbi.kemendikdasmen.go.id/*` | Bypass CORS to fetch definitions |
+
+## Icons
+
+Icons were extracted from the official KBBI VI Daring favicon (`/kbbi-daring-3.ico`) using Pillow:
+
+```bash
+python3 -c "
+from PIL import Image
+ico = Image.open('kbbi-daring-3.ico')
+ico.size = (16,16); ico.convert('RGBA').save('icons/icon16.png')
+ico.size = (48,48); ico.convert('RGBA').save('icons/icon48.png')
+img128 = ico.convert('RGBA').resize((128,128), Image.LANCZOS)
+img128.save('icons/icon128.png')
+"
+```
+
+The icon is a gold "K" on dark navy (#292261) background — matching the KBBI VI Daring brand.
 
 ## Known limitations & future work
 
-- **Multi-word phrases** — the URL scheme `kbbi.web.id/{word}` only accepts single words; phrases silently return no results.
-- **Login-only entries** — some rare entries on kbbi.web.id require a registered account; the extension will show "not found" for those.
-- **Icon quality** — current icons are programmatically generated pixel art. Replace `icons/icon*.png` with proper artwork and re-run `node generate-icons.js` (or drop in hand-crafted PNGs directly).
+- **Multi-word phrases** — `/entri/{word}` only handles single words. The site has a `/Cari/Hasil?frasa={query}` endpoint for phrases; could be added as a fallback.
+- **Login-only content** — etymology and some extended info only appear for registered users; the extension shows the publicly available subset.
+- **No suggestions** — when a word is not found, kbbi.kemendikdasmen.go.id does not return similar-word suggestions (unlike the old kbbi.web.id).
 - **Offline/cache** — no caching; every lookup is a live fetch.
 
 ## Potential improvements
 
-- Search history (use `chrome.storage.local`)
-- Keyboard shortcut to open popup with selected text pre-filled (`commands` API)
+- Phrase search via `/Cari/Hasil?frasa=` when direct `/entri/` returns not found
+- Search history (`chrome.storage.local`)
+- Keyboard shortcut (`commands` API) to open popup with selected text pre-filled
 - Side panel mode (Chrome 114+ `sidePanel` API) instead of new tab for context menu
-- Dark mode (CSS `prefers-color-scheme`)
-- Word audio pronunciation (kbbi.web.id sometimes embeds audio)
+- Dark mode (`prefers-color-scheme`)

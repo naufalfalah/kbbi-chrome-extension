@@ -5,17 +5,20 @@
 }
 
 :root {
-  --red: #cc0001;
-  --red-light: #f8e8e8;
+  --navy: #292261;
+  --navy-dark: #1b1640;
+  --red: #e60000;
+  --gold: #c8a000;
+  --gold-light: #fdf6dc;
   --text: #1a1a2e;
   --text-muted: #666;
   --border: #e0e0e0;
   --bg: #ffffff;
-  --bg-soft: #f9f9f9;
-  --label-color: #b5451b;
-  --example-color: #2563a8;
+  --bg-soft: #f7f8fc;
+  --label-color: #292261;
+  --example-color: #1a6fa8;
   --radius: 8px;
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --shadow: 0 2px 12px rgba(41, 34, 97, 0.10);
 }
 
 body {
@@ -45,12 +48,12 @@ body {
 }
 
 .search-bar input:focus {
-  border-color: var(--red);
+  border-color: var(--navy);
 }
 
 .search-bar button {
   padding: 9px 18px;
-  background: var(--red);
+  background: var(--navy);
   color: white;
   border: none;
   border-radius: var(--radius);
@@ -62,7 +65,7 @@ body {
 }
 
 .search-bar button:hover {
-  background: #a80001;
+  background: var(--navy-dark);
 }
 
 .search-bar button:disabled {
@@ -79,7 +82,7 @@ body {
 }
 
 .status.error {
-  color: var(--red);
+  color: var(--navy);
 }
 
 .spinner {
@@ -87,7 +90,7 @@ body {
   width: 22px;
   height: 22px;
   border: 3px solid var(--border);
-  border-top-color: var(--red);
+  border-top-color: var(--navy);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   margin-bottom: 8px;
@@ -109,7 +112,7 @@ body {
 
 .entry-header {
   padding: 10px 16px;
-  background: var(--red);
+  background: linear-gradient(to right, var(--navy), 60%, var(--red));
   color: white;
   font-size: 15px;
   font-weight: 700;
@@ -143,8 +146,8 @@ body {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--red-light);
-  color: var(--red);
+  background: var(--gold-light);
+  color: var(--navy);
   font-size: 11px;
   font-weight: 700;
   display: flex;
@@ -168,8 +171,9 @@ body {
 .label {
   font-size: 11px;
   font-weight: 600;
-  color: var(--label-color);
-  background: #fdebd0;
+  color: var(--navy);
+  background: var(--gold-light);
+  border: 1px solid #e8d97a;
   border-radius: 3px;
   padding: 1px 5px;
 }
@@ -243,8 +247,8 @@ body {
 }
 
 .sug-btn:hover {
-  border-color: var(--red);
-  color: var(--red);
+  border-color: var(--navy);
+  color: var(--navy);
 }
 
 /* ── KBBI source link ── */
@@ -259,7 +263,7 @@ body {
 
 .kbbi-link:hover {
   text-decoration: underline;
-  color: var(--red);
+  color: var(--navy);
 }
 
 /* ── Results container ── */

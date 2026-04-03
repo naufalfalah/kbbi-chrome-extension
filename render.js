@@ -100,10 +100,10 @@ function renderResults(data, container, word) {
   // Source link
   const link = document.createElement('a');
   link.className = 'kbbi-link';
-  link.href = `https://kbbi.web.id/${encodeURIComponent(word)}`;
+  link.href = `https://kbbi.kemendikdasmen.go.id/entri/${encodeURIComponent(word)}`;
   link.target = '_blank';
   link.rel = 'noopener noreferrer';
-  link.textContent = 'Lihat di kbbi.web.id ↗';
+  link.textContent = 'Lihat di KBBI VI Daring ↗';
   container.appendChild(link);
 }
 

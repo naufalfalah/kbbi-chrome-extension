@@ -29,7 +29,7 @@ async function doSearch(word) {
     const data = await searchKBBI(word);
     renderResults(data, results, word);
   } catch (err) {
-    renderError(results, `Gagal menghubungi KBBI: ${err.message}`);
+    renderError(results, `Gagal menghubungi KBBI VI Daring: ${err.message}`);
   } finally {
     btn.disabled = false;
   }
