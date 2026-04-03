@@ -1,10 +1,10 @@
 # Privacy Policy — KBBI Chrome Extension
 
-[Bahasa Indonesia] | [English](#english)
+[Bahasa Indonesia](#indonesia) | [English](#english)
 
 ---
 
-## Bahasa Indonesia
+## Bahasa Indonesia <a name="indonesia"></a>
 
 Kebijakan Privasi — KBBI Chrome Extension
 Terakhir diperbarui: April 2025
