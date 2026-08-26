@@ -27,13 +27,17 @@ The extension fetches data directly from the official government source at `kbbi
 
 ### From Chrome Web Store
 
-<!-- Add Chrome Web Store link here -->
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/nojbogkoambcgcjpeokebfpdnpbcnjbm?label=chrome%20web%20store)](https://chromewebstore.google.com/detail/nojbogkoambcgcjpeokebfpdnpbcnjbm)
+
+**[→ Install from the Chrome Web Store](https://chromewebstore.google.com/detail/nojbogkoambcgcjpeokebfpdnpbcnjbm)**
+
+Published April 2026 · Manifest V3 · 27 KB · No data collected
 
 ### Manual Installation (Developer Mode)
 
 1. Clone or download this repository
    ```bash
-   git clone https://github.com/naufalfallah/kbbi-chrome-extension.git
+   git clone https://github.com/naufalfalah/kbbi-chrome-extension.git
    ```
 2. Open `chrome://extensions` in Chrome
 3. Enable **Developer mode** (toggle in the top-right corner)
@@ -126,7 +130,7 @@ The extension does not request `storage`, `scripting`, `tabs`, `activeTab`, or a
 ### Setup
 
 ```bash
-git clone https://github.com/naufalfallah/kbbi-chrome-extension.git
+git clone https://github.com/naufalfalah/kbbi-chrome-extension.git
 cd kbbi-chrome-extension
 # Load unpacked in chrome://extensions — see Installation above
 ```
@@ -226,4 +230,4 @@ This extension does **not** collect, store, or transmit any personal data.
 
 ## License
 
-MIT © [Naufal Falah](https://github.com/naufalfallah)
+MIT © [Naufal Falah](https://github.com/naufalfalah)
