@@ -1,0 +1,11 @@
+{
+  "name": "kbbi-chrome-extension",
+  "private": true,
+  "description": "Dev-only tooling for the KBBI Chrome extension (not shipped in the extension bundle).",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.3"
+  }
+}

@@ -97,14 +97,18 @@ function renderResults(data, container, word) {
     container.appendChild(card);
   });
 
-  // Source link
-  const link = document.createElement('a');
-  link.className = 'kbbi-link';
-  link.href = `https://kbbi.kemendikdasmen.go.id/entri/${encodeURIComponent(word)}`;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
-  link.textContent = 'Lihat di KBBI VI Daring ↗';
-  container.appendChild(link);
+  // Source link — points at whichever source (see kbbi.js ACTIVE_SOURCE)
+  // the definitions above were actually fetched from.
+  const activeSource = typeof getActiveSource === 'function' ? getActiveSource() : null;
+  if (activeSource) {
+    const link = document.createElement('a');
+    link.className = 'kbbi-link';
+    link.href = activeSource.buildUrl(word);
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = `Lihat di ${activeSource.label} ↗`;
+    container.appendChild(link);
+  }
 }
 
 function renderNotFoundWithSuggestions(suggestions, container) {
