@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "KBBI - Kamus Besar Bahasa Indonesia",
-  "version": "1.0.0",
-  "description": "Cari definisi kata bahasa Indonesia langsung dari KBBI VI Daring (kbbi.kemendikdasmen.go.id)",
+  "version": "1.0.1",
+  "description": "Cari definisi kata bahasa Indonesia langsung dari Kamus Besar Bahasa Indonesia (KBBI)",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -24,6 +24,7 @@
     "contextMenus"
   ],
   "host_permissions": [
-    "https://kbbi.kemendikdasmen.go.id/*"
+    "https://kbbi.kemendikdasmen.go.id/*",
+    "https://kbbi.web.id/*"
   ]
 }
