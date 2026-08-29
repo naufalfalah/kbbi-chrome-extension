@@ -1,17 +1,17 @@
 # KBBI — Kamus Besar Bahasa Indonesia
 
 <!-- Add Chrome Web Store badge here once published -->
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.0.1-blue)
 ![Manifest](https://img.shields.io/badge/manifest-v3-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-> Look up any Indonesian word in the official KBBI VI Daring dictionary — directly from your browser toolbar or by right-clicking any word on any page.
+> Look up any Indonesian word in the KBBI dictionary — directly from your browser toolbar or by right-clicking any word on any page.
 
 ## Overview
 
-Reading Indonesian text online and hitting an unfamiliar word means opening a new tab, navigating to kbbi.kemendikdasmen.go.id, and typing the word out again. This extension removes that detour entirely. Select a word and right-click, or open the toolbar popup and type — definitions from the authoritative Ministry of Education dictionary (KBBI VI Daring) appear in seconds, complete with grammar class labels, register labels, and usage examples, without leaving the page you were reading.
+Reading Indonesian text online and hitting an unfamiliar word means opening a new tab, navigating to a KBBI site, and typing the word out again. This extension removes that detour entirely. Select a word and right-click, or open the toolbar popup and type — definitions appear in seconds, complete with grammar class labels, register labels, and usage examples, without leaving the page you were reading.
 
-The extension fetches data directly from the official government source at `kbbi.kemendikdasmen.go.id`, so definitions are always current and authoritative — the same content as the website, just surfaced where you already are.
+The extension fetches data directly from a KBBI source over HTTPS — no proxy, no bundled/offline dataset. Two sources are supported, switchable by the developer in `kbbi.js` (see [Data sources](#data-sources) below): the official Ministry of Education site (`kbbi.kemendikdasmen.go.id`, KBBI VI Daring) and a community-run mirror (`kbbi.web.id`, based on KBBI III). **The active source is currently `kbbi.web.id`**, because `kbbi.kemendikdasmen.go.id` has been blocking anonymous requests since August 2026 — see [Data sources](#data-sources) for details and how to switch back.
 
 ## Features
 
@@ -20,7 +20,7 @@ The extension fetches data directly from the official government source at `kbbi
 - **Homonym-aware display** — shows all homonyms as separate numbered cards (e.g., _makan¹_, _makan²_)
 - **Structured definitions** — numbered definitions with grammar labels (`v`, `n`, `a`) and register labels (`ki`, `pb`, `Ark`, `Tas`) displayed as styled chips
 - **Usage examples** — italicised example sentences and parenthetical glosses shown beneath each definition
-- **Live source link** — every result card links back to the full KBBI VI Daring entry for deeper reading
+- **Live source link** — every result card links back to the full entry on whichever site the definitions were fetched from
 - **URL-driven results page** — the full-page view updates the browser URL on each search, making results bookmarkable and shareable
 
 ## Installation
@@ -50,13 +50,14 @@ No build step. No `npm install`. The extension is ready immediately.
 
 This is a **Manifest V3** extension with three active components: a **toolbar popup**, a **full-page results view**, and a **background service worker**.
 
-The popup (`popup.html` + `popup.js`) and results page (`results.html` + `results.js`) share two modules — `kbbi.js` (network + parsing) and `render.js` (DOM rendering) — loaded via plain `<script src>` tags. There is no message passing between them; each page runs the full pipeline independently.
+The popup (`popup.html` + `popup.js`) and results page (`results.html` + `results.js`) share the same modules, loaded in order via plain `<script src>` tags: `parsers/kemendikdasmen.js`, `parsers/kbbiwebid.js`, `kbbi.js` (a thin dispatcher over whichever parser is active), and `render.js` (DOM rendering). There is no message passing between the two pages; each runs the full pipeline independently.
 
 **Data flow — popup:**
 ```
 User types word → popup.js → searchKBBI() in kbbi.js
-  → fetch https://kbbi.kemendikdasmen.go.id/entri/{word}
-  → parseKBBI() walks server-rendered HTML with DOMParser
+  → kbbi.js looks up ACTIVE_SOURCE in the parsers/ registry
+  → fetch <active source's URL for word>
+  → that source's parse(html) walks the response with DOMParser
   → render.js writes structured DOM into #results
 ```
 
@@ -68,15 +69,34 @@ User selects text → right-click → "Cari … di KBBI"
   → results.js reads ?word= on DOMContentLoaded → same pipeline as popup
 ```
 
-The parser (`kbbi.js`) works against server-rendered HTML because the KBBI VI Daring site exposes no JSON API. It uses `DOMParser` to build an in-memory document, then locates entry headings via `<h2>` elements that carry a `<sup>` child (homonym number) or a `margin-bottom` inline style. For each heading it walks forward siblings, collecting `<ol>` and `<ul>` definition lists until hitting the next entry heading or an `<hr>`. Each `<li>` is parsed by colour-coded `<font>` element convention: red = grammar class labels, green = register labels, grey = usage examples, brown = parenthetical glosses.
+Both KBBI sources render definitions as server-side HTML with no public JSON API, so both parsers work the same general way: fetch, then use `DOMParser` to build an in-memory document and walk it. The actual markup conventions are unrelated between the two sites — see [Data sources](#data-sources) for how each one is parsed.
 
 The results page also uses `window.history.replaceState` to update `?word=` on every new search — so navigating back or copying the URL always reflects the current result.
 
+## Data sources
+
+The extension supports two KBBI sources. Only one is active at a time, chosen by a single developer-edited constant — there is no in-popup source picker, and no permission is used to persist a user choice.
+
+| | `kbbi.kemendikdasmen.go.id` | `kbbi.web.id` |
+|---|---|---|
+| Status | Official, Ministry of Education (Kemendikdasmen) | Unofficial community mirror |
+| Edition | KBBI VI Daring | Based on KBBI III (older) |
+| Parser | `parsers/kemendikdasmen.js` | `parsers/kbbiwebid.js` |
+| URL pattern | `/entri/{word}`, homonyms share one page | `/{word}`, each homonym is its own page (`/makan`, `/makan-2`, …) |
+
+**Currently active: `kbbi.web.id`.** As of August 2026, `kbbi.kemendikdasmen.go.id` started blocking anonymous requests with a "Moda Terbatas" login-wall page instead of returning results, which made the extension appear to return "not found" for every word. `kbbi.web.id` doesn't have this restriction, so it's the active source until the official site's access policy changes.
+
+**To switch sources**, edit `ACTIVE_SOURCE` in `kbbi.js` (currently set to `'kbbiwebid'`):
+```js
+const ACTIVE_SOURCE = 'kemendikdasmen'; // 'kemendikdasmen' | 'kbbiwebid'
+```
+then reload the unpacked extension (or ship a new version). Both parsers return the identical `searchKBBI` result shape, so no other file needs to change. `host_permissions` in `manifest.json` already grants both domains, so switching never requires a new Chrome Web Store permission review.
+
 ## Permissions
 
-**`contextMenus`** — required to register the "Cari … di KBBI" item in the browser's right-click menu and listen for clicks on it.
+**`contextMenus`** — required to register the "Cari … di KBBI" item in the browser's right-click menu and listen for clicks on it. `background.js` also calls `chrome.tabs.create` to open the results tab from that menu, which does not itself require the `tabs` permission in MV3 (only reading other tabs' URLs/titles would).
 
-**`host_permissions: https://kbbi.kemendikdasmen.go.id/*`** — the extension pages (`popup.html`, `results.html`) are Chrome extension origins (`chrome-extension://…`). Without this host permission, the browser's CORS policy would block the cross-origin `fetch()` to the KBBI server. This permission grants fetch access only to that specific domain — no other site is touched.
+**`host_permissions`** — `https://kbbi.kemendikdasmen.go.id/*` and `https://kbbi.web.id/*`. The extension pages (`popup.html`, `results.html`) are Chrome extension origins (`chrome-extension://…`). Without these host permissions, the browser's CORS policy would block the cross-origin `fetch()` to whichever KBBI source is active. Both domains are granted upfront (see [Data sources](#data-sources)) so switching sources never needs a new permission review — no other site is touched.
 
 The extension does not request `storage`, `scripting`, `tabs`, `activeTab`, or any other permission. It cannot read, modify, or inject content into the pages you visit.
 
@@ -101,8 +121,14 @@ The extension does not request `storage`, `scripting`, `tabs`, `activeTab`, or a
 ---
 
 **Decision:** HTML scraping via `DOMParser` rather than a JSON API.  
-**Why:** kbbi.kemendikdasmen.go.id renders definitions as server-side HTML with no public JSON endpoint. `DOMParser` runs entirely in the extension page's renderer — no headless browser, no third-party proxy.  
-**Trade-off:** Tightly coupled to the site's markup conventions (`font[color="red"]`, `h2[style*="margin-bottom"]`). A server-side change to the KBBI markup would break the parser. The parsing heuristics are isolated to `parseKBBI()` and `parseLi()` in `kbbi.js`, making updates surgical.
+**Why:** Neither KBBI source exposes a public JSON endpoint — both render definitions as server-side HTML. `DOMParser` runs entirely in the extension page's renderer — no headless browser, no third-party proxy.  
+**Trade-off:** Tightly coupled to each site's markup conventions — `kbbi.kemendikdasmen.go.id` via colour-coded `<font>` elements, `kbbi.web.id` via a flat `<div>` with digit-vs-text `<b>` tags (see [Data sources](#data-sources)). A server-side markup change on either site would break that site's parser. Each source's parsing logic is isolated in its own file under `parsers/`, so a fix is scoped to one file and one source stays available while the other is being fixed.
+
+---
+
+**Decision:** Two KBBI sources behind a dispatcher, switched by a code constant rather than a settings UI.  
+**Why:** Both sources have gone down or blocked anonymous access at different points; having a second parser ready to go means a source outage is a one-line, no-permission-review fix (`ACTIVE_SOURCE` in `kbbi.js`) instead of an emergency parser rewrite.  
+**Trade-off:** Switching requires shipping a new extension version — there's no way for an end user to pick a source themselves. That's deliberate for now: a user-facing picker would need the `storage` permission and UI design work that hasn't been justified yet by actual need.
 
 ---
 
@@ -196,10 +222,11 @@ Upload `kbbi-extension.zip` in the Chrome Web Store Developer Dashboard.
 
 ## Known Limitations
 
-- **Single words only** — `/entri/{word}` handles one word at a time. The site has a `/Cari/Hasil?frasa=` endpoint for phrase search; could be added as a fallback when the direct entry lookup returns not found.
-- **No similar-word suggestions** — kbbi.kemendikdasmen.go.id does not return spelling suggestions for unmatched queries (unlike the old kbbi.web.id).
-- **Login-only content** — etymology and extended metadata are only visible to registered users on the site; the extension surfaces the publicly available subset.
+- **No similar-word suggestions** — `searchKBBI` always returns `suggestions: []`; neither parser currently extracts spelling suggestions for unmatched queries.
+- **Single words only** — a lookup is one word at a time, matching how each source's URL pattern works (`/entri/{word}` on kbbi.kemendikdasmen.go.id, `/{word}` on kbbi.web.id).
 - **No offline cache** — every lookup is a live network request.
+- **`kbbi.kemendikdasmen.go.id` (standby source):** as of August 2026 this site blocks anonymous requests with a "Moda Terbatas" login wall, which is why `kbbi.web.id` is the active source (see [Data sources](#data-sources)). Etymology and extended metadata on the official site are also only visible to registered users; even once it's reachable again, the extension only surfaces the publicly available subset.
+- **`kbbi.web.id` (active source):** an unofficial mirror based on KBBI III, so entries can be older or worded differently than the official KBBI VI Daring. Its markup has no structural separator between main senses, idioms, and derived word forms — the parser splits them with a best-effort heuristic (see `CLAUDE.md`), so grouping can occasionally be off for unusual entries.
 
 ## Potential Improvements
 
@@ -223,7 +250,7 @@ Please do not introduce npm dependencies or a bundler without discussing it in a
 
 This extension does **not** collect, store, or transmit any personal data.
 
-- The only network request it makes is `GET https://kbbi.kemendikdasmen.go.id/entri/{word}` — the word you searched for is sent to the KBBI server, the same as visiting the website directly in your browser.
+- The only network request it makes is a `GET` to whichever KBBI source is active (see [Data sources](#data-sources); currently `https://kbbi.web.id/{word}`) — the word you searched for is sent to that server, the same as visiting the website directly in your browser.
 - No analytics, no telemetry, no third-party services.
 - No data is written to `chrome.storage` or any other persistent store.
 - The extension cannot read or modify the content of any webpage you visit — it has no content scripts and no `activeTab` permission.
