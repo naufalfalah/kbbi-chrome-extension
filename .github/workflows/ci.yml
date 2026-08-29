@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Validate manifest.json is well-formed JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('manifest.json', 'utf8')); console.log('manifest.json OK')"
+
+      - name: Check JS files parse (syntax check)
+        run: |
+          shopt -s nullglob globstar
+          files=(**/*.js)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No JS files found"; exit 1
+          fi
+          for f in "${files[@]}"; do
+            echo "Checking $f"
+            node --check "$f"
+          done
+        shell: bash
+
+      - name: Install test dependencies
+        run: npm ci
+
+      - name: Run parser tests
+        run: npm test
