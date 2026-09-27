@@ -3,7 +3,8 @@
   "private": true,
   "description": "Dev-only tooling for the KBBI Chrome extension (not shipped in the extension bundle).",
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "package": "./scripts/pack.sh"
   },
   "devDependencies": {
     "jsdom": "^24.1.3"
