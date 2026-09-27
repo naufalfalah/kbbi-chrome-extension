@@ -2,7 +2,7 @@
 
 ## Project overview
 
-Manifest V3 Chrome extension that fetches Indonesian word definitions from KBBI. Two sources are supported — **kbbi.kemendikdasmen.go.id** (KBBI VI Daring, official Ministry source) and **kbbi.web.id** (unofficial community mirror, based on KBBI III) — with the active one chosen by a developer-only constant, not a runtime setting. No build step, no bundler — plain HTML/CSS/JS files loaded directly by Chrome. A `package.json` with `jsdom` exists, but only as a devDependency for running parser tests in Node; it is not part of the shipped extension.
+Manifest V3 Chrome extension that fetches Indonesian word definitions from KBBI. Two sources are supported — **kbbi.kemendikdasmen.go.id** (KBBI VI Daring, official Ministry source) and **kbbi.web.id** (unofficial community mirror, based on KBBI III) — with the active one chosen by a developer-only constant, not a runtime setting. No build step, no bundler — plain HTML/CSS/JS files loaded directly by Chrome. A `package.json` exists only for dev tooling — `jsdom` as a devDependency for parser tests (`npm test`) and `npm run package` to build the store zip; it is not part of the shipped extension.
 
 ## Key architectural decisions
 
@@ -21,7 +21,7 @@ Both parsers return the exact same shape (see `searchKBBI` return shape below) s
 - `kbbi.web.id` puts a single homonym's entire content — numbered senses, idioms, and derived word forms — into one flat `<div id="d1">`, told apart only by whether a `<b>` tag's content is a bare number or text. Each homonym is a separate URL (`/makan`, `/makan-2`, …), unlike the official site where multiple homonyms share one page. See parser notes below.
 
 ### Shared vs page-specific files
-- `kbbi.js` — dispatcher only: reads `ACTIVE_SOURCE`, fetches, delegates parsing to the matching `parsers/*.js` module. No DOM side effects, exports only `searchKBBI`
+- `kbbi.js` — dispatcher only: reads `ACTIVE_SOURCE`, fetches, delegates parsing to the matching `parsers/*.js` module. No DOM side effects. Exposes `searchKBBI` plus `getActiveSource()` (the active parser's `{ buildUrl, parse, label }` — `render.js` uses it for the "view full entry" link, and `popup.js`/`results.js` for the source name in error messages) and `ACTIVE_SOURCE`
 - `parsers/kemendikdasmen.js`, `parsers/kbbiwebid.js` — one parser per source, each self-registering on `globalThis.KBBIParsers`
 - `render.js` — pure rendering (`renderResults`, `renderLoading`, `renderError`). Calls `onSuggestionClick(word)` which **must be defined** in the consuming page's JS
 - `shared.css` — all styles; popup.html and results.html both link this
@@ -47,6 +47,7 @@ Both parsers return the exact same shape (see `searchKBBI` return shape below) s
 | `results.js` | Results controller; defines `onSuggestionClick`, updates URL |
 | `icons/*.png` | Extracted from official KBBI VI Daring favicon (gold K on navy) |
 | `generate-icons.js` | Node fallback to regenerate icons (not loaded by Chrome) |
+| `scripts/pack.sh` | Builds `kbbi-extension-v<version>.zip` for the Chrome Web Store (`npm run package`). Holds an **allow-list** of runtime files — add any new runtime file (e.g. a new `parsers/*.js`) here or it won't ship |
 | `test/*.test.js` | `node:test` + `jsdom` parser tests, run via `npm test` and in CI |
 | `docs/adr/*.md` | Architecture Decision Records — background/rationale for non-obvious structural decisions |
 | `test/fixtures/kemendikdasmen/`, `test/fixtures/kbbiwebid/` | Saved HTML fixtures per source |

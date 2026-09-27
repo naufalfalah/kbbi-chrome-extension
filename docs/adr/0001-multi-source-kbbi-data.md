@@ -12,7 +12,7 @@ official Ministry site). The parser (`kbbi.js`) fetched that site directly
 and parsed its HTML in place — there was no source abstraction layer at
 all.
 
-On 2026-08-26, while adding parser tests (see `TO-DO.md` Stage 2 item 2),
+On 2026-08-26, while adding parser tests (`test/`, run in CI),
 repeated attempts to capture a real HTML fixture from the official site
 failed: anonymous `fetch` requests to `/entri/makan` and `/entri/rumah`
 (tried with several different user agents) consistently returned a **"Moda
@@ -141,6 +141,6 @@ site is confirmed working again.
 
 - `CLAUDE.md` — "Multi-source parsing: dispatcher + per-source parser
   files" section and each site's markup notes.
-- `TO-DO.md` — Stage 2 item 5, decision history and real-browser
-  (Playwright) verification for both source scenarios.
+- PR #1 (`feat(parser): support two KBBI data sources`) — the
+  implementing change.
 - `README.md` — "Data sources" section.

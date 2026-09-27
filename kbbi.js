@@ -14,7 +14,7 @@
 
 const ACTIVE_SOURCE = 'kbbiwebid'; // 'kemendikdasmen' | 'kbbiwebid'
 // kbbi.kemendikdasmen.go.id is blocking anonymous fetches with a "Moda
-// Terbatas" login wall as of 2026-08-26 (see CLAUDE.md / TO-DO.md) — flip
+// Terbatas" login wall as of 2026-08-26 (see docs/adr/0001) — flip
 // this back to 'kemendikdasmen' once that source is confirmed working again.
 
 /**

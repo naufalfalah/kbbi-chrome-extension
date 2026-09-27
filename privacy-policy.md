@@ -7,7 +7,7 @@
 ## Bahasa Indonesia <a name="indonesia"></a>
 
 Kebijakan Privasi — KBBI Chrome Extension
-Terakhir diperbarui: Agustus 2026
+Terakhir diperbarui: September 2026
 
 1. Data yang Dikumpulkan
 KBBI Chrome Extension tidak mengumpulkan, menyimpan, atau mengirimkan data pribadi pengguna kepada pengembang maupun pihak ketiga mana pun.
@@ -23,8 +23,8 @@ Ekstensi ini tidak menggunakan chrome.storage, localStorage, IndexedDB, atau mek
 
 4. Izin (Permissions)
 • contextMenus — untuk mendaftarkan menu klik kanan "Cari di KBBI".
-• tabs — untuk membuka tab hasil dari menu klik kanan.
 • host_permissions (kbbi.kemendikdasmen.go.id dan kbbi.web.id) — untuk melewati batasan CORS saat mengambil definisi dari sumber data yang sedang aktif.
+Ekstensi ini tidak meminta izin tabs, storage, maupun akses ke semua situs (<all_urls>), dan tidak menjalankan content script di halaman yang Anda kunjungi. Tab hasil dari menu klik kanan dibuka tanpa memerlukan izin tabs.
 Tidak ada izin yang digunakan untuk melacak aktivitas penelusuran Anda di luar fungsi pencarian kamus.
 
 5. Perubahan Kebijakan
@@ -38,7 +38,7 @@ Pertanyaan dapat diajukan melalui: https://github.com/naufalfalah/kbbi-chrome-ex
 ## English <a name="english"></a>
 
 Privacy Policy — KBBI Chrome Extension
-Last updated: August 2026
+Last updated: September 2026
 
 1. Data Collected
 KBBI Chrome Extension does not collect, store, or transmit any personal data to the developer or any third party.
@@ -54,8 +54,8 @@ This extension does not use chrome.storage, localStorage, IndexedDB, or any othe
 
 4. Permissions
 • contextMenus — to register the right-click "Search in KBBI" menu item.
-• tabs — to open a results tab from the context menu.
 • host_permissions (kbbi.kemendikdasmen.go.id and kbbi.web.id) — to bypass CORS restrictions when fetching definitions from whichever source is currently active.
+This extension does not request the tabs or storage permissions or access to all sites (<all_urls>), and runs no content scripts on the pages you visit. The results tab opened from the context menu does not require the tabs permission.
 No permissions are used to track your browsing activity beyond the dictionary search function.
 
 5. Policy Changes

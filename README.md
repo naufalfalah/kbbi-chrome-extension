@@ -1,6 +1,5 @@
 # KBBI — Kamus Besar Bahasa Indonesia
 
-<!-- Add Chrome Web Store badge here once published -->
 ![Version](https://img.shields.io/badge/version-1.0.1-blue)
 ![Manifest](https://img.shields.io/badge/manifest-v3-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
@@ -109,7 +108,7 @@ The extension does not request `storage`, `scripting`, `tabs`, `activeTab`, or a
 ---
 
 **Decision:** No bundler, no build step — plain HTML/CSS/JS.  
-**Why:** The extension has two pages and three shared modules, all loaded with `<script src>` tags. A bundler would add toolchain complexity with no material benefit at this scale, and would require contributors to install Node just to load the extension.  
+**Why:** The extension has two pages and four shared scripts (two parsers, the `kbbi.js` dispatcher, and `render.js`), all loaded with `<script src>` tags. A bundler would add toolchain complexity with no material benefit at this scale, and would require contributors to install Node just to load the extension.  
 **Trade-off:** No tree-shaking, no TypeScript, no minification. Acceptable at this codebase size; revisit if the module count grows substantially.
 
 ---
@@ -127,7 +126,7 @@ The extension does not request `storage`, `scripting`, `tabs`, `activeTab`, or a
 ---
 
 **Decision:** Two KBBI sources behind a dispatcher, switched by a code constant rather than a settings UI.  
-**Why:** Both sources have gone down or blocked anonymous access at different points; having a second parser ready to go means a source outage is a one-line, no-permission-review fix (`ACTIVE_SOURCE` in `kbbi.js`) instead of an emergency parser rewrite.  
+**Why:** Either source can go down or block anonymous access without notice — the official site already did in August 2026 (see [Data sources](#data-sources)); having a second parser ready to go means a source outage is a one-line, no-permission-review fix (`ACTIVE_SOURCE` in `kbbi.js`) instead of an emergency parser rewrite.  
 **Trade-off:** Switching requires shipping a new extension version — there's no way for an end user to pick a source themselves. That's deliberate for now: a user-facing picker would need the `storage` permission and UI design work that hasn't been justified yet by actual need.
 
 ---
@@ -151,6 +150,7 @@ The extension does not request `storage`, `scripting`, `tabs`, `activeTab`, or a
 
 - Chrome 109 or later
 - A text editor
+- Node.js 20+ (only for running tests and building the store package — not needed to load the extension)
 - Python 3 + Pillow (only if regenerating icons)
 
 ### Setup
@@ -159,6 +159,9 @@ The extension does not request `storage`, `scripting`, `tabs`, `activeTab`, or a
 git clone https://github.com/naufalfalah/kbbi-chrome-extension.git
 cd kbbi-chrome-extension
 # Load unpacked in chrome://extensions — see Installation above
+
+npm install   # optional: only needed for tests / packaging
+npm test      # parser tests (node:test + jsdom), also run in CI
 ```
 
 Changes to any file take effect after clicking the reload icon (↺) on the extension card in `chrome://extensions`. Changes to `background.js` also require clicking **Update** or reloading the service worker from the extension card.
@@ -171,7 +174,10 @@ kbbi-chrome-extension/
 ├── manifest.json        # MV3 manifest — permissions, icons, popup, service worker
 ├── background.js        # Service worker — registers and handles the context menu
 │
-├── kbbi.js              # searchKBBI(word) — fetch + HTML parse, no DOM side effects
+├── kbbi.js              # searchKBBI(word) — dispatcher: picks ACTIVE_SOURCE, fetches, delegates parsing
+├── parsers/
+│   ├── kemendikdasmen.js  # URL builder + parser for kbbi.kemendikdasmen.go.id
+│   └── kbbiwebid.js       # URL builder + parser for kbbi.web.id
 ├── render.js            # renderResults / renderLoading / renderError — DOM only
 ├── shared.css           # All styles — linked by both popup.html and results.html
 │
@@ -186,7 +192,15 @@ kbbi-chrome-extension/
 │   ├── icon48.png       # Extension management page icon (48 × 48)
 │   └── icon128.png      # Chrome Web Store icon (128 × 128)
 │
-└── generate-icons.js    # Node script to regenerate icons from the .ico file
+│  ── dev-only (not shipped in the store package) ──
+├── scripts/pack.sh      # Builds the Chrome Web Store .zip (npm run package)
+├── test/                # node:test + jsdom parser tests and saved HTML fixtures per source
+├── docs/adr/            # Architecture Decision Records
+├── .github/workflows/   # CI: manifest validation, JS syntax check, tests, PR title lint
+├── package.json         # Dev tooling only (jsdom, npm scripts)
+├── generate-icons.js    # Node script to regenerate icons from the .ico file
+├── CLAUDE.md            # Context notes for AI-assisted development
+└── privacy-policy.md    # Privacy policy linked from the Chrome Web Store listing
 ```
 
 ### Regenerating Icons
@@ -207,18 +221,23 @@ img128.save('icons/icon128.png')
 
 ### Building & Packaging for the Chrome Web Store
 
-There is no build step. To produce the `.zip` for store submission:
+There is no build step — packaging just zips the runtime files:
 
 ```bash
-zip -r kbbi-extension.zip . \
-  --exclude "*.git*" \
-  --exclude "*.DS_Store" \
-  --exclude "generate-icons.js" \
-  --exclude "README.md" \
-  --exclude "privacy-policy.md"
+npm run package        # or: ./scripts/pack.sh
 ```
 
-Upload `kbbi-extension.zip` in the Chrome Web Store Developer Dashboard.
+This produces `kbbi-extension-v<version>.zip` in the repo root, with the version read from `manifest.json` (`*.zip` is git-ignored). The script deletes any previous zip of the same name first — `zip` only adds to an existing archive, so a file removed from the repo would otherwise linger in the package.
+
+`scripts/pack.sh` lists the files the extension actually loads at runtime (an allow-list) rather than excluding dev files — an exclude-list drifts out of date every time a dev-only file (docs, tests, CI config) is added, and silently ships it to the store. **If you add a new runtime file** (e.g. a new `parsers/*.js` source), add it to the list in `scripts/pack.sh`.
+
+Release checklist:
+
+1. Bump `"version"` in `manifest.json` (and the version badge at the top of this README) — the store rejects a version that isn't higher than the live one.
+2. `npm test`
+3. `npm run package`, then check the contents with `unzip -l kbbi-extension-v<version>.zip`
+4. Extract the zip into a temporary folder and load *that* folder via **Load unpacked** — this catches a runtime file missing from the allow-list before users do.
+5. Upload the zip in the Chrome Web Store Developer Dashboard.
 
 ## Known Limitations
 
@@ -241,10 +260,10 @@ Upload `kbbi-extension.zip` in the Chrome Web Store Developer Dashboard.
 1. Fork the repository
 2. Load unpacked in Chrome developer mode
 3. Make your changes — no build step needed
-4. Test both the popup and the context menu (right-click on selected text)
+4. Run `npm test`, then test both the popup and the context menu (right-click on selected text)
 5. Open a pull request with a clear description of what changed and why
 
-Please do not introduce npm dependencies or a bundler without discussing it in an issue first.
+Please do not introduce runtime npm dependencies or a bundler without discussing it in an issue first (dev-only tooling in `package.json`, such as `jsdom` for tests, is fine).
 
 ## Privacy
 

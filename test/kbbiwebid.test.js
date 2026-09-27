@@ -14,7 +14,8 @@ function fixture(name) {
 
 // Fixtures here are real captures from kbbi.web.id (2026-08-26), unlike the
 // kemendikdasmen ones which had to be reconstructed by hand because that
-// site was blocking anonymous fetches at the time — see TO-DO.md.
+// site was blocking anonymous fetches at the time — see
+// docs/adr/0001-multi-source-kbbi-data.md.
 
 test('parses the single-entry <div id="d1"> into the searchKBBI shape', () => {
   const result = parseKbbiWebId(fixture('makan.html'));
