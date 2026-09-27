@@ -199,6 +199,7 @@ kbbi-chrome-extension/
 ├── .github/workflows/   # CI: manifest validation, JS syntax check, tests, PR title lint
 ├── package.json         # Dev tooling only (jsdom, npm scripts)
 ├── generate-icons.js    # Node script to regenerate icons from the .ico file
+├── CHANGELOG.md         # Release history, incl. fixes forced by KBBI site changes
 ├── CLAUDE.md            # Context notes for AI-assisted development
 └── privacy-policy.md    # Privacy policy linked from the Chrome Web Store listing
 ```
@@ -233,7 +234,7 @@ This produces `kbbi-extension-v<version>.zip` in the repo root, with the version
 
 Release checklist:
 
-1. Bump `"version"` in `manifest.json` (and the version badge at the top of this README) — the store rejects a version that isn't higher than the live one.
+1. Bump `"version"` in `manifest.json` (and the version badge at the top of this README) — the store rejects a version that isn't higher than the live one. Move the `[Unreleased]` entries in `CHANGELOG.md` under the new version.
 2. `npm test`
 3. `npm run package`, then check the contents with `unzip -l kbbi-extension-v<version>.zip`
 4. Extract the zip into a temporary folder and load *that* folder via **Load unpacked** — this catches a runtime file missing from the allow-list before users do.

@@ -49,6 +49,7 @@ Both parsers return the exact same shape (see `searchKBBI` return shape below) s
 | `generate-icons.js` | Node fallback to regenerate icons (not loaded by Chrome) |
 | `scripts/pack.sh` | Builds `kbbi-extension-v<version>.zip` for the Chrome Web Store (`npm run package`). Holds an **allow-list** of runtime files — add any new runtime file (e.g. a new `parsers/*.js`) here or it won't ship |
 | `test/*.test.js` | `node:test` + `jsdom` parser tests, run via `npm test` and in CI |
+| `CHANGELOG.md` | Keep a Changelog release history. Parser fixes forced by a KBBI site change go under **Source changes** (date observed, what changed on the site, impact, fix) |
 | `docs/adr/*.md` | Architecture Decision Records — background/rationale for non-obvious structural decisions |
 | `test/fixtures/kemendikdasmen/`, `test/fixtures/kbbiwebid/` | Saved HTML fixtures per source |
 
